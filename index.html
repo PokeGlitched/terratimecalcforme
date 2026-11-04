@@ -181,6 +181,16 @@ h1 span { color: var(--green); }
     text-align: right;
 }
 
+.water-icon {
+    display: inline-block;
+    width: 9px;
+    height: 12px;
+    background: #55b9ff;
+    border-radius: 60% 60% 60% 0;
+    transform: rotate(-45deg);
+    margin-right: 5px;
+}
+
 .holiday {
     color: var(--muted);
 }
@@ -270,11 +280,8 @@ button:hover {
     <div class="badge">NOV 4 — JAN 10</div>
 </header>
 
-<!-- MAIN DASHBOARD -->
-
 <div class="card">
     <div class="stats">
-
         <div>
             <div class="stat-label">TOTAL HOURS</div>
             <div class="stat-number green" id="total">0.00</div>
@@ -292,7 +299,6 @@ button:hover {
             <div class="stat-number" id="percentage">0%</div>
             <div class="small">Overall progress</div>
         </div>
-
     </div>
 
     <div class="progress-bg">
@@ -300,13 +306,10 @@ button:hover {
     </div>
 </div>
 
-<!-- WEEKLY TRACKER -->
-
 <div class="card">
     <h2 class="section-title">📊 Current Week</h2>
 
     <div class="stats">
-
         <div>
             <div class="stat-label">HOURS LOGGED</div>
             <div class="stat-number" id="weekHours">0</div>
@@ -319,9 +322,8 @@ button:hover {
 
         <div>
             <div class="stat-label">WATER LEFT</div>
-            <div class="stat-number green" id="waterLeft">0</div>
+            <div class="stat-number green" id="waterLeft">10</div>
         </div>
-
     </div>
 
     <div class="progress-bg">
@@ -333,17 +335,15 @@ button:hover {
     </p>
 </div>
 
-<!-- CROP TRACKER -->
-
 <div class="card">
     <h2 class="section-title">🌾 Crop Optimization</h2>
+
     <div class="small">
         Best crop costs 2 water. Water carries over during
         the week but resets every Monday.
     </div>
 
     <div class="crop-grid">
-
         <div class="crop-item">
             <div class="small">WATER THIS WEEK</div>
             <strong id="cropWater">0</strong>
@@ -358,19 +358,16 @@ button:hover {
             <div class="small">LEFTOVER WATER</div>
             <strong id="cropLeft">0</strong>
         </div>
-
     </div>
 </div>
-
-<!-- CALENDAR -->
 
 <div class="card">
     <h2 class="section-title">📅 Project Calendar</h2>
 
     <p class="small">
-        Enter the actual hours you complete each day.
-        Your progress saves automatically in your browser.
+        Enter actual hours completed each day.
         Decimal hours are supported.
+        Progress saves automatically in your browser.
     </p>
 
     <div id="calendar"></div>
@@ -408,12 +405,7 @@ const HOLIDAYS = [
     "2027-01-01"
 ];
 
-// ========================================
-// WEEKLY SCHEDULE
-// ========================================
-
-// Targets: 10 + 22 + 22 + 18 + 22
-//          + 22 + 22 + 20 + 20 + 22 = 200
+// Weekly targets
 
 const WEEK_TARGETS = {
     "2026-11-02": 10,
@@ -437,10 +429,7 @@ let logs = JSON.parse(
 );
 
 function save() {
-    localStorage.setItem(
-        "terraLogs",
-        JSON.stringify(logs)
-    );
+    localStorage.setItem("terraLogs", JSON.stringify(logs));
 }
 
 // ========================================
@@ -458,16 +447,12 @@ function formatDate(date) {
 function getMonday(date) {
     const d = new Date(date);
     const day = d.getDay();
-
     d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-
     return d;
 }
 
 function formatDay(date) {
-    return date.toLocaleDateString("en-US", {
-        weekday: "long"
-    });
+    return date.toLocaleDateString("en-US", { weekday: "long" });
 }
 
 function formatShort(date) {
@@ -523,7 +508,6 @@ function buildCalendar() {
 
         weekHeader.appendChild(weekTitle);
         weekHeader.appendChild(status);
-
         week.appendChild(weekHeader);
 
         const days = document.createElement("div");
@@ -543,8 +527,7 @@ function buildCalendar() {
 
             dayInfo.innerHTML = `
                 <div class="${holiday ? "day-name holiday" : "day-name"}">
-                    ${formatDay(current)}
-                    ${holiday ? " 🎄" : ""}
+                    ${formatDay(current)} ${holiday ? "🎄" : ""}
                 </div>
                 <div class="day-date">
                     ${formatShort(current)}
@@ -581,11 +564,13 @@ function buildCalendar() {
 
                 save();
                 updateDashboard();
+                updateDayWater();
             });
 
             const water = document.createElement("div");
             water.className = "day-water";
-            water.textContent = "💧 " + (logs[dayKey] || 0);
+            water.innerHTML =
+                `<span class="water-icon"></span> ${logs[dayKey] || 0}`;
 
             row.appendChild(dayInfo);
             row.appendChild(input);
@@ -601,7 +586,25 @@ function buildCalendar() {
 
         date = new Date(current);
     }
+}
 
+// Update individual daily water displays
+
+function updateDayWater() {
+
+    const rows = document.querySelectorAll(".day");
+
+    rows.forEach(row => {
+        const input = row.querySelector("input");
+        const water = row.querySelector(".day-water");
+
+        if(!input || !water) return;
+
+        const date = input.getAttribute("aria-label").replace("Hours logged on ","");
+
+        water.innerHTML =
+            `<span class="water-icon"></span> ${logs[date] || 0}`;
+    });
 }
 
 // ========================================
@@ -609,12 +612,10 @@ function buildCalendar() {
 // ========================================
 
 function getTotal() {
-
     return Object.values(logs).reduce(
         (sum,hours) => sum + Number(hours || 0),
         0
     );
-
 }
 
 function getWeekHours(key) {
@@ -657,7 +658,6 @@ function updateDashboard() {
     // Current platform week
 
     const now = new Date();
-    const todayKey = formatDate(now);
     const start = new Date(2026,10,2);
     const finish = new Date(2027,0,10);
 
@@ -672,9 +672,7 @@ function updateDashboard() {
         weekHours.toFixed(2);
 
     document.getElementById("waterLeft").textContent =
-        (WEEKLY_MINIMUM-weekHours > 0
-            ? WEEKLY_MINIMUM-weekHours
-            : 0).toFixed(2);
+        Math.max(0,WEEKLY_MINIMUM-weekHours).toFixed(2);
 
     document.getElementById("weekProgress").style.width =
         Math.min(100,weekHours/WEEKLY_MINIMUM*100)+"%";
@@ -710,7 +708,6 @@ function updateDashboard() {
             el.innerHTML = '<span class="badge neutral">Not logged</span>';
         }
 
-        // Also show planned target progress
         el.title = hours.toFixed(2)+" / "+WEEK_TARGETS[key]+" hours";
     });
 
@@ -719,14 +716,17 @@ function updateDashboard() {
     const monday = getWeekKey(now);
     const water = getWeekHours(monday);
 
+    const cropCycles = Math.floor(water / 2);
+    const leftoverWater = water % 2;
+
     document.getElementById("cropWater").textContent =
         water.toFixed(2);
 
     document.getElementById("cropCycles").textContent =
-        Math.floor(water/2);
+        cropCycles;
 
     document.getElementById("cropLeft").textContent =
-        (water%2).toFixed(2);
+        leftoverWater.toFixed(2);
 
     updateMilestones(total);
 }
@@ -784,7 +784,7 @@ function resetData() {
 
 function exportData() {
 
-    let csv = "Date,Hours,Week Starting,Water,Crop Cycles,Leftover Water\n";
+    let csv = "Date,Hours,Week Starting,Weekly Water,Crop Cycles,Leftover Water\n";
 
     let date = new Date(2026,10,4);
     const end = new Date(2027,0,10);
