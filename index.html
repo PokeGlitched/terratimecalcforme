@@ -1,0 +1,824 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terra | Project Dashboard</title>
+
+<style>
+:root {
+    --bg: #101713;
+    --panel: #19231c;
+    --panel2: #202d23;
+    --green: #75d69a;
+    --green2: #315c40;
+    --text: #eef5ed;
+    --muted: #9ba99d;
+    --red: #ff7777;
+    --border: #304034;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    padding: 30px 18px;
+}
+
+.container {
+    max-width: 1050px;
+    margin: auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+h1 {
+    font-size: 30px;
+    margin: 0;
+}
+
+h1 span { color: var(--green); }
+
+.subtitle {
+    color: var(--muted);
+    margin-top: 7px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-number {
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.green { color: var(--green); }
+.red { color: var(--red); }
+
+.progress-bg {
+    height: 12px;
+    background: #303a32;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    transition: width .3s;
+}
+
+.section-title {
+    font-size: 21px;
+    margin: 0 0 18px;
+}
+
+.week {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.week-header {
+    background: var(--panel2);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.week-header h3 {
+    margin: 0 0 5px;
+}
+
+.week-info {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.week-status {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.days {
+    padding: 8px 16px;
+}
+
+.day {
+    display: grid;
+    grid-template-columns: 1fr 105px 65px;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.day:last-child { border-bottom: none; }
+
+.day-name { font-weight: bold; }
+
+.day-date {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.day input {
+    width: 100%;
+    padding: 9px;
+    background: var(--bg);
+    color: white;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+.day input:focus {
+    outline: 1px solid var(--green);
+}
+
+.day input:disabled {
+    opacity: .5;
+}
+
+.day-water {
+    color: var(--green);
+    font-size: 12px;
+    text-align: right;
+}
+
+.holiday {
+    color: var(--muted);
+}
+
+.badge {
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: var(--green2);
+    color: var(--green);
+}
+
+.badge.warning {
+    background: #482929;
+    color: var(--red);
+}
+
+.badge.neutral {
+    background: #303a32;
+    color: var(--muted);
+}
+
+.crop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.crop-item {
+    background: var(--panel2);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.crop-item strong {
+    font-size: 24px;
+    display: block;
+    margin-top: 8px;
+}
+
+.small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+button {
+    padding: 10px 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+button:hover {
+    border-color: var(--green);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+@media(max-width: 600px) {
+    .stats { grid-template-columns: 1fr; }
+    .crop-grid { grid-template-columns: 1fr; }
+    .day {
+        grid-template-columns: 1fr 85px;
+    }
+    .day-water { display: none; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+    <div>
+        <h1>🌱 Terra<span>Tracker</span></h1>
+        <div class="subtitle">Hack Club Hardware Grant Challenge</div>
+    </div>
+    <div class="badge">NOV 4 — JAN 10</div>
+</header>
+
+<!-- MAIN DASHBOARD -->
+
+<div class="card">
+    <div class="stats">
+
+        <div>
+            <div class="stat-label">TOTAL HOURS</div>
+            <div class="stat-number green" id="total">0.00</div>
+            <div class="small">Out of 200 hours</div>
+        </div>
+
+        <div>
+            <div class="stat-label">HOURS REMAINING</div>
+            <div class="stat-number" id="remaining">200</div>
+            <div class="small">Until January 10</div>
+        </div>
+
+        <div>
+            <div class="stat-label">COMPLETION</div>
+            <div class="stat-number" id="percentage">0%</div>
+            <div class="small">Overall progress</div>
+        </div>
+
+    </div>
+
+    <div class="progress-bg">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+</div>
+
+<!-- WEEKLY TRACKER -->
+
+<div class="card">
+    <h2 class="section-title">📊 Current Week</h2>
+
+    <div class="stats">
+
+        <div>
+            <div class="stat-label">HOURS LOGGED</div>
+            <div class="stat-number" id="weekHours">0</div>
+        </div>
+
+        <div>
+            <div class="stat-label">HOURS REQUIRED</div>
+            <div class="stat-number">10</div>
+        </div>
+
+        <div>
+            <div class="stat-label">WATER LEFT</div>
+            <div class="stat-number green" id="waterLeft">0</div>
+        </div>
+
+    </div>
+
+    <div class="progress-bg">
+        <div class="progress-fill" id="weekProgress"></div>
+    </div>
+
+    <p class="small" id="weekStatus">
+        Log your hours below to get started.
+    </p>
+</div>
+
+<!-- CROP TRACKER -->
+
+<div class="card">
+    <h2 class="section-title">🌾 Crop Optimization</h2>
+    <div class="small">
+        Best crop costs 2 water. Water carries over during
+        the week but resets every Monday.
+    </div>
+
+    <div class="crop-grid">
+
+        <div class="crop-item">
+            <div class="small">WATER THIS WEEK</div>
+            <strong id="cropWater">0</strong>
+        </div>
+
+        <div class="crop-item">
+            <div class="small">OPTIMAL CROPS</div>
+            <strong class="green" id="cropCycles">0</strong>
+        </div>
+
+        <div class="crop-item">
+            <div class="small">LEFTOVER WATER</div>
+            <strong id="cropLeft">0</strong>
+        </div>
+
+    </div>
+</div>
+
+<!-- CALENDAR -->
+
+<div class="card">
+    <h2 class="section-title">📅 Project Calendar</h2>
+
+    <p class="small">
+        Enter the actual hours you complete each day.
+        Your progress saves automatically in your browser.
+        Decimal hours are supported.
+    </p>
+
+    <div id="calendar"></div>
+
+    <div class="actions">
+        <button onclick="resetData()">Reset all progress</button>
+        <button onclick="exportData()">Export progress CSV</button>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="section-title">🎯 Project Milestones</h2>
+    <div id="milestones"></div>
+</div>
+
+<p class="small" style="text-align:center; margin-top:30px;">
+    Built for Terra by Hack Club 🌱
+    <br>Stay consistent. Keep your island alive.
+</p>
+
+</div>
+
+<script>
+
+// ========================================
+// CONFIGURATION
+// ========================================
+
+const GOAL = 200;
+const WEEKLY_MINIMUM = 10;
+
+const HOLIDAYS = [
+    "2026-11-26",
+    "2026-12-25",
+    "2027-01-01"
+];
+
+// ========================================
+// WEEKLY SCHEDULE
+// ========================================
+
+// Targets: 10 + 22 + 22 + 18 + 22
+//          + 22 + 22 + 20 + 20 + 22 = 200
+
+const WEEK_TARGETS = {
+    "2026-11-02": 10,
+    "2026-11-09": 22,
+    "2026-11-16": 22,
+    "2026-11-23": 18,
+    "2026-11-30": 22,
+    "2026-12-07": 22,
+    "2026-12-14": 22,
+    "2026-12-21": 20,
+    "2026-12-28": 20,
+    "2027-01-04": 22
+};
+
+// ========================================
+// STORAGE
+// ========================================
+
+let logs = JSON.parse(
+    localStorage.getItem("terraLogs") || "{}"
+);
+
+function save() {
+    localStorage.setItem(
+        "terraLogs",
+        JSON.stringify(logs)
+    );
+}
+
+// ========================================
+// DATE HELPERS
+// ========================================
+
+function formatDate(date) {
+    return [
+        date.getFullYear(),
+        String(date.getMonth()+1).padStart(2,"0"),
+        String(date.getDate()).padStart(2,"0")
+    ].join("-");
+}
+
+function getMonday(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+
+    return d;
+}
+
+function formatDay(date) {
+    return date.toLocaleDateString("en-US", {
+        weekday: "long"
+    });
+}
+
+function formatShort(date) {
+    return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+    });
+}
+
+function getWeekKey(date) {
+    return formatDate(getMonday(date));
+}
+
+// ========================================
+// BUILD CALENDAR
+// ========================================
+
+function buildCalendar() {
+
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    let date = new Date(2026,10,4);
+    const end = new Date(2027,0,10);
+
+    while(date <= end) {
+
+        const monday = getMonday(date);
+        const key = formatDate(monday);
+        const target = WEEK_TARGETS[key];
+
+        const week = document.createElement("div");
+        week.className = "week";
+
+        const weekHeader = document.createElement("div");
+        weekHeader.className = "week-header";
+
+        const weekTitle = document.createElement("div");
+
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate()+6);
+
+        weekTitle.innerHTML = `
+            <h3>${formatShort(monday)} – ${formatShort(sunday)}</h3>
+            <div class="week-info">
+                Weekly target: ${target} hours
+            </div>
+        `;
+
+        const status = document.createElement("div");
+        status.className = "week-status";
+        status.id = "status-" + key;
+
+        weekHeader.appendChild(weekTitle);
+        weekHeader.appendChild(status);
+
+        week.appendChild(weekHeader);
+
+        const days = document.createElement("div");
+        days.className = "days";
+
+        let current = new Date(date);
+
+        while(current <= end && getWeekKey(current) === key) {
+
+            const dayKey = formatDate(current);
+            const holiday = HOLIDAYS.includes(dayKey);
+
+            const row = document.createElement("div");
+            row.className = "day";
+
+            const dayInfo = document.createElement("div");
+
+            dayInfo.innerHTML = `
+                <div class="${holiday ? "day-name holiday" : "day-name"}">
+                    ${formatDay(current)}
+                    ${holiday ? " 🎄" : ""}
+                </div>
+                <div class="day-date">
+                    ${formatShort(current)}
+                    ${holiday ? " — Holiday / Rest Day" : ""}
+                </div>
+            `;
+
+            const input = document.createElement("input");
+            input.type = "number";
+            input.min = "0";
+            input.max = "24";
+            input.step = "0.25";
+            input.placeholder = "0 hours";
+            input.value = logs[dayKey] ?? "";
+            input.disabled = holiday;
+            input.setAttribute("aria-label","Hours logged on "+dayKey);
+
+            input.addEventListener("change", () => {
+
+                let value = Number(input.value);
+
+                if(!Number.isFinite(value) || value < 0 || value > 24) {
+                    alert("Enter a number between 0 and 24.");
+                    input.value = logs[dayKey] ?? "";
+                    return;
+                }
+
+                if(holiday && value !== 0) {
+                    input.value = 0;
+                    return;
+                }
+
+                logs[dayKey] = value;
+
+                save();
+                updateDashboard();
+            });
+
+            const water = document.createElement("div");
+            water.className = "day-water";
+            water.textContent = "💧 " + (logs[dayKey] || 0);
+
+            row.appendChild(dayInfo);
+            row.appendChild(input);
+            row.appendChild(water);
+
+            days.appendChild(row);
+
+            current.setDate(current.getDate()+1);
+        }
+
+        week.appendChild(days);
+        calendar.appendChild(week);
+
+        date = new Date(current);
+    }
+
+}
+
+// ========================================
+// CALCULATE HOURS
+// ========================================
+
+function getTotal() {
+
+    return Object.values(logs).reduce(
+        (sum,hours) => sum + Number(hours || 0),
+        0
+    );
+
+}
+
+function getWeekHours(key) {
+
+    let total = 0;
+
+    for(let date in logs) {
+        const d = new Date(date+"T12:00:00");
+
+        if(getWeekKey(d) === key) {
+            total += Number(logs[date] || 0);
+        }
+    }
+
+    return total;
+}
+
+// ========================================
+// UPDATE DASHBOARD
+// ========================================
+
+function updateDashboard() {
+
+    const total = getTotal();
+    const remaining = Math.max(0,GOAL-total);
+    const percentage = Math.min(100,total/GOAL*100);
+
+    document.getElementById("total").textContent =
+        total.toFixed(2);
+
+    document.getElementById("remaining").textContent =
+        remaining.toFixed(2);
+
+    document.getElementById("percentage").textContent =
+        percentage.toFixed(1)+"%";
+
+    document.getElementById("progress").style.width =
+        percentage+"%";
+
+    // Current platform week
+
+    const now = new Date();
+    const todayKey = formatDate(now);
+    const start = new Date(2026,10,2);
+    const finish = new Date(2027,0,10);
+
+    let currentKey = getWeekKey(now);
+
+    if(now < start) currentKey = "2026-11-02";
+    if(now > finish) currentKey = "2027-01-04";
+
+    const weekHours = getWeekHours(currentKey);
+
+    document.getElementById("weekHours").textContent =
+        weekHours.toFixed(2);
+
+    document.getElementById("waterLeft").textContent =
+        (WEEKLY_MINIMUM-weekHours > 0
+            ? WEEKLY_MINIMUM-weekHours
+            : 0).toFixed(2);
+
+    document.getElementById("weekProgress").style.width =
+        Math.min(100,weekHours/WEEKLY_MINIMUM*100)+"%";
+
+    const status = document.getElementById("weekStatus");
+
+    if(weekHours >= WEEKLY_MINIMUM) {
+        status.innerHTML =
+            "✅ Weekly minimum achieved! Your island is safe.";
+        status.className = "small green";
+    } else {
+        status.innerHTML =
+            "⚠️ You need "+
+            (WEEKLY_MINIMUM-weekHours).toFixed(2)+
+            " more hours this week.";
+        status.className = "small red";
+    }
+
+    // Weekly status labels
+
+    Object.keys(WEEK_TARGETS).forEach(key => {
+
+        const hours = getWeekHours(key);
+        const el = document.getElementById("status-"+key);
+
+        if(!el) return;
+
+        if(hours >= WEEKLY_MINIMUM) {
+            el.innerHTML = '<span class="badge">✓ Minimum met</span>';
+        } else if(hours > 0) {
+            el.innerHTML = '<span class="badge warning">Below minimum</span>';
+        } else {
+            el.innerHTML = '<span class="badge neutral">Not logged</span>';
+        }
+
+        // Also show planned target progress
+        el.title = hours.toFixed(2)+" / "+WEEK_TARGETS[key]+" hours";
+    });
+
+    // Water / crop tracker
+
+    const monday = getWeekKey(now);
+    const water = getWeekHours(monday);
+
+    document.getElementById("cropWater").textContent =
+        water.toFixed(2);
+
+    document.getElementById("cropCycles").textContent =
+        Math.floor(water/2);
+
+    document.getElementById("cropLeft").textContent =
+        (water%2).toFixed(2);
+
+    updateMilestones(total);
+}
+
+// ========================================
+// MILESTONES
+// ========================================
+
+function updateMilestones(total) {
+
+    const milestones = [
+        {hours:10,name:"First weekly survival milestone"},
+        {hours:50,name:"25% of the project"},
+        {hours:100,name:"Halfway to 200 hours"},
+        {hours:150,name:"75% completion"},
+        {hours:200,name:"Terra challenge complete! 🎉"}
+    ];
+
+    const container = document.getElementById("milestones");
+
+    container.innerHTML = milestones.map(m => `
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            padding:12px 0;
+            border-bottom:1px solid var(--border);
+        ">
+            <span>${m.name}</span>
+            <span class="${total >= m.hours ? "green" : "small"}">
+                ${total >= m.hours ? "✓ COMPLETE" : m.hours+" h"}
+            </span>
+        </div>
+    `).join("");
+}
+
+// ========================================
+// RESET
+// ========================================
+
+function resetData() {
+
+    if(!confirm("Are you sure you want to erase ALL logged hours?")) {
+        return;
+    }
+
+    logs = {};
+    save();
+    buildCalendar();
+    updateDashboard();
+}
+
+// ========================================
+// EXPORT CSV
+// ========================================
+
+function exportData() {
+
+    let csv = "Date,Hours,Week Starting,Water,Crop Cycles,Leftover Water\n";
+
+    let date = new Date(2026,10,4);
+    const end = new Date(2027,0,10);
+
+    while(date <= end) {
+
+        const key = formatDate(date);
+        const hours = Number(logs[key] || 0);
+        const week = getWeekKey(date);
+        const water = getWeekHours(week);
+
+        csv += `${key},${hours},${week},${water},${Math.floor(water/2)},${water%2}\n`;
+
+        date.setDate(date.getDate()+1);
+    }
+
+    const blob = new Blob([csv],{type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "terra-progress.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+// ========================================
+// START
+// ========================================
+
+buildCalendar();
+updateDashboard();
+
+</script>
+</body>
+</html>
